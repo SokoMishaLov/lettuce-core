@@ -632,6 +632,7 @@
                 <artifactId>kotlin-maven-plugin</artifactId>
                 <configuration>
                     <args>
+                        <arg>-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi</arg>
                         <arg>-Xopt-in=kotlin.RequiresOptIn</arg>
                         <arg>-Xopt-in=io.lettuce.core.ExperimentalLettuceCoroutinesApi</arg>
                     </args>
@@ -1002,7 +1003,7 @@
                                     <arguments>
                                         <argument>-Xmx2G</argument>
                                         <argument>-classpath</argument>
-                                        <classpath />
+                                        <classpath/>
                                         <argument>org.openjdk.jmh.Main</argument>
                                         <argument>.*</argument>
                                         <argument>-tu</argument>
@@ -1078,7 +1079,9 @@
                                 <phase>process-resources</phase>
                                 <configuration>
                                     <target>
-                                        <copy failonerror="false" file="${project.build.directory}/generated-docs/index.pdf" tofile="target/site/reference/pdf/lettuce-reference.pdf" />
+                                        <copy failonerror="false"
+                                              file="${project.build.directory}/generated-docs/index.pdf"
+                                              tofile="target/site/reference/pdf/lettuce-reference.pdf"/>
                                     </target>
                                 </configuration>
                                 <goals>
@@ -1145,9 +1148,9 @@
                                 <toclevels>3</toclevels>
                                 <numbered>true</numbered>
                                 <ext-doc>https://raw.githubusercontent.com/wiki/lettuce-io/lettuce-core/</ext-doc>
-                                <allow-uri-read />
-                                <docinfo />
-                                <toc2 />
+                                <allow-uri-read/>
+                                <docinfo/>
+                                <toc2/>
                                 <icons>font</icons>
                                 <source-highlighter>coderay</source-highlighter>
                             </attributes>

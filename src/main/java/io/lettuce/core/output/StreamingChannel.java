@@ -22,4 +22,17 @@ package io.lettuce.core.output;
  * @since 5.0
  */
 public interface StreamingChannel {
+
+    /**
+     * Called on streaming completion
+     */
+    default void onComplete() {
+    }
+
+    /**
+     * Called on streaming completion
+     */
+    default void onError(Throwable cause) {
+    }
+
 }

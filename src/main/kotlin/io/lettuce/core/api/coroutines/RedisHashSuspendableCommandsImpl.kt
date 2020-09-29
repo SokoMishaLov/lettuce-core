@@ -20,7 +20,10 @@ package io.lettuce.core.api.coroutines
 
 import io.lettuce.core.*
 import io.lettuce.core.api.reactive.RedisHashReactiveCommands
+import io.lettuce.core.output.KeyValueCoroutinesStreamingChannel
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 
@@ -46,7 +49,7 @@ internal class RedisHashSuspendableCommandsImpl<K : Any, V : Any>(private val op
 
     override suspend fun hincrbyfloat(key: K, field: K, amount: Double): Double? = ops.hincrbyfloat(key, field, amount).awaitFirstOrNull()
 
-    override suspend fun hgetall(key: K): Map<K, V>? = ops.hgetall(key).awaitFirstOrNull()
+    override fun hgetall(key: K): Flow<Pair<K, V>> = callbackFlow { ops.hgetall(KeyValueCoroutinesStreamingChannel(this), key).awaitFirstOrNull(); awaitClose() }
 
     override fun hkeys(key: K): Flow<K> = ops.hkeys(key).asFlow()
 

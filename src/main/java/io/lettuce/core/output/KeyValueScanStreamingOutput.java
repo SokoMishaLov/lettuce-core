@@ -15,17 +15,16 @@
  */
 package io.lettuce.core.output;
 
-import java.nio.ByteBuffer;
-
+import io.lettuce.core.RedisCommandExecutionException;
 import io.lettuce.core.StreamScanCursor;
 import io.lettuce.core.codec.RedisCodec;
+import java.nio.ByteBuffer;
 
 /**
  * Streaming-Output of Key Value Pairs. Returns the count of all Key-Value pairs (including null).
  *
  * @param <K> Key type.
  * @param <V> Value type.
- *
  * @author Mark Paluch
  */
 public class KeyValueScanStreamingOutput<K, V> extends ScanOutput<K, V, StreamScanCursor> {
@@ -54,4 +53,15 @@ public class KeyValueScanStreamingOutput<K, V> extends ScanOutput<K, V, StreamSc
         key = null;
     }
 
+    @Override
+    public void complete(int depth) {
+        super.complete(depth);
+        if (depth == 0) channel.onComplete();
+    }
+
+    @Override
+    public void setError(ByteBuffer error) {
+        super.setError(error);
+        channel.onError(new RedisCommandExecutionException(getError()));
+    }
 }

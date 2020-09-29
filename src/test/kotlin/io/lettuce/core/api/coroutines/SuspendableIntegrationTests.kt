@@ -24,6 +24,8 @@ import io.lettuce.core.cluster.api.suspendable
 import io.lettuce.core.sentinel.SentinelTestSettings
 import io.lettuce.core.sentinel.api.suspendable
 import io.lettuce.test.LettuceExtension
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -41,7 +43,6 @@ class SuspendableIntegrationTests : TestSupport() {
     @Test
     @Inject
     internal fun shouldInvokeCoroutineCorrectlyForStandalone(connection: StatefulRedisConnection<String, String>) {
-
         runBlocking {
 
             val suspendable = connection.suspendable()
@@ -53,10 +54,22 @@ class SuspendableIntegrationTests : TestSupport() {
 
     @Test
     @Inject
+    internal fun shouldInvokeCoroutineCorrectlyForStreamingChannels(connection: StatefulRedisConnection<String, String>) {
+        runBlocking {
+            with(connection.suspendable()) {
+                hset(key, "1", value)
+                hset(key, "2", value)
+                hset(key, "3", value)
+
+                assertThat(hgetall(key).toList()).hasSize(3)
+            }
+        }
+    }
+
+    @Test
+    @Inject
     internal fun shouldInvokeCoroutineCorrectlyForCluster(client: RedisClusterClient) {
-
-
-        val connection = client.connect();
+        val connection = client.connect()
         runBlocking {
 
             val suspendable = connection.suspendable()
@@ -71,7 +84,6 @@ class SuspendableIntegrationTests : TestSupport() {
     @Test
     @Inject
     internal fun shouldInvokeCoroutineCorrectlyForSentinel(client: RedisClient) {
-
         val connection = client.connectSentinel(SentinelTestSettings.SENTINEL_URI)
 
         runBlocking {

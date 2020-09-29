@@ -24,7 +24,7 @@ package io.lettuce.core.output;
  * @since 3.0
  */
 @FunctionalInterface
-public interface ValueStreamingChannel<V> {
+public interface ValueStreamingChannel<V> extends StreamingChannel {
 
     /**
      * Called on every incoming value.

@@ -93,7 +93,7 @@ interface RedisHashSuspendableCommands<K : Any, V : Any> {
      *        does not exist.
      * TODO: Change to Flow
      */
-    suspend fun hgetall(key: K): Map<K, V>?
+    fun hgetall(key: K): Flow<Pair<K, V>>
 
     /**
      * Get all the fields in a hash.

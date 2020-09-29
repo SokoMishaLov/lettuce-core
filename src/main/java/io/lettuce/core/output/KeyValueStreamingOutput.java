@@ -15,10 +15,11 @@
  */
 package io.lettuce.core.output;
 
+import io.lettuce.core.RedisCommandExecutionException;
+import io.lettuce.core.codec.RedisCodec;
+
 import java.nio.ByteBuffer;
 import java.util.Iterator;
-
-import io.lettuce.core.codec.RedisCodec;
 
 /**
  * Streaming-Output of Key Value Pairs. Returns the count of all Key-Value pairs (including null).
@@ -50,7 +51,6 @@ public class KeyValueStreamingOutput<K, V> extends CommandOutput<K, V, Long> {
 
     @Override
     public void set(ByteBuffer bytes) {
-
         if (keys == null) {
             if (key == null) {
                 key = codec.decodeKey(bytes);
@@ -69,4 +69,15 @@ public class KeyValueStreamingOutput<K, V> extends CommandOutput<K, V, Long> {
         key = null;
     }
 
+    @Override
+    public void complete(int depth) {
+        super.complete(depth);
+        if (depth == 0) channel.onComplete();
+    }
+
+    @Override
+    public void setError(ByteBuffer error) {
+        super.setError(error);
+        channel.onError(new RedisCommandExecutionException(getError()));
+    }
 }
