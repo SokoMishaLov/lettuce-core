@@ -24,6 +24,7 @@ import io.lettuce.core.cluster.api.suspendable
 import io.lettuce.core.sentinel.SentinelTestSettings
 import io.lettuce.core.sentinel.api.suspendable
 import io.lettuce.test.LettuceExtension
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -41,47 +42,55 @@ class SuspendableIntegrationTests : TestSupport() {
     @Test
     @Inject
     internal fun shouldInvokeCoroutineCorrectlyForStandalone(connection: StatefulRedisConnection<String, String>) {
-
         runBlocking {
+            with(connection.suspendable()) {
+                set("key", "value")
 
-            val suspendable = connection.suspendable()
-            suspendable.set("key", "value")
+                assertThat(get("key")).isEqualTo("value")
+            }
+        }
+    }
 
-            assertThat(suspendable.get("key")).isEqualTo("value")
+    @Test
+    @Inject
+    internal fun shouldInvokeCoroutineCorrectlyForStreamingChannels(connection: StatefulRedisConnection<String, String>) {
+        runBlocking {
+            with(connection.suspendable()) {
+                hset(key, "1", value)
+                hset(key, "2", value)
+                hset(key, "3", value)
+
+                assertThat(hgetall(key).toList()).hasSize(3)
+            }
         }
     }
 
     @Test
     @Inject
     internal fun shouldInvokeCoroutineCorrectlyForCluster(client: RedisClusterClient) {
-
-
-        val connection = client.connect();
+        val connection = client.connect()
         runBlocking {
+            with(connection.suspendable()) {
 
-            val suspendable = connection.suspendable()
-            suspendable.set("key", "value")
+                set("key", "value")
 
-            assertThat(suspendable.get("key")).isEqualTo("value")
+                assertThat(get("key")).isEqualTo("value")
+            }
         }
 
-        connection.close();
+        connection.close()
     }
 
     @Test
     @Inject
     internal fun shouldInvokeCoroutineCorrectlyForSentinel(client: RedisClient) {
-
         val connection = client.connectSentinel(SentinelTestSettings.SENTINEL_URI)
-
         runBlocking {
-
-            val suspendable = connection.suspendable()
-
-            assertThat(suspendable.master(SentinelTestSettings.MASTER_ID)).isNotEmpty
-            assertThat(suspendable.slaves(SentinelTestSettings.MASTER_ID)).isNotEmpty
+            with(connection.suspendable()) {
+                assertThat(master(SentinelTestSettings.MASTER_ID)).isNotEmpty
+                assertThat(slaves(SentinelTestSettings.MASTER_ID)).isNotEmpty
+            }
         }
-
         connection.close()
     }
 }

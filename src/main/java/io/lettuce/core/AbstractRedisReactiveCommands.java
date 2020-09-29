@@ -60,7 +60,7 @@ public abstract class AbstractRedisReactiveCommands<K, V> implements RedisHashRe
 
     private final StatefulConnection<K, V> connection;
 
-    private final RedisCommandBuilder<K, V> commandBuilder;
+    final RedisCommandBuilder<K, V> commandBuilder;
 
     private final ClientResources clientResources;
 

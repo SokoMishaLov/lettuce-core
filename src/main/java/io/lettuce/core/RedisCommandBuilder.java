@@ -31,6 +31,7 @@ import io.lettuce.core.models.stream.PendingMessage;
 import io.lettuce.core.models.stream.PendingMessages;
 import io.lettuce.core.output.*;
 import io.lettuce.core.protocol.*;
+import reactor.util.function.Tuple2;
 
 /**
  * @param <K>
@@ -944,6 +945,12 @@ class RedisCommandBuilder<K, V> extends BaseRedisCommandBuilder<K, V> {
         notNull(channel);
 
         return createCommand(HGETALL, new KeyValueStreamingOutput<>(codec, channel), key);
+    }
+
+    Command<K, V, List<Tuple2<K, V>>> hgetallFlux(K key) {
+        notNullKey(key);
+
+        return createCommand(HGETALL, new Tuple2ListOutput<>(codec), key);
     }
 
     Command<K, V, Long> hincrby(K key, K field, long amount) {
